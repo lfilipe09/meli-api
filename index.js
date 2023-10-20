@@ -1,7 +1,7 @@
 const serverless = require("serverless-http");
 const express = require("express");
 const axios = require("axios");
-const { productsMapper, itemsMapper } = require("./utils");
+const { productMapper, itemsMapper } = require("./utils");
 
 const app = express();
 const meliBaseURL = "https://api.mercadolibre.com";
@@ -39,20 +39,22 @@ app.get("/api/items/:id", async (req, res, next) => {
   try {
     const itemId = req.params.id;
 
-    const itemURL = `${meliBaseURL}/items?ids=${itemId}`;    
+    const itemURL = `${meliBaseURL}/items/${itemId}`;    
     const response = await axios.get(itemURL);
 
-    const categoryURL = `${meliBaseURL}/categories/${response.data[0].body.category_id}`;
+    const categoryURL = `${meliBaseURL}/categories/${response.data.category_id}`;
     const categoryResponse = await axios.get(categoryURL);
 
-    const categories = categoryResponse.data?.path_from_root?.map(path => path.name) || []
-    const productData = response.data[0].body
+    const descriptionURL = `${meliBaseURL}/items/${itemId}/description`;    
+    const descriptionResponse = await axios.get(descriptionURL);
 
-    const itemResponse = productsMapper(categories, productData)
+    const categories = categoryResponse.data?.path_from_root?.map(path => path.name) || []
+
+    const itemResponse = productMapper(categories, response.data, descriptionResponse.data.plain_text)
 
     return res.status(200).json(itemResponse);
   } catch (error) {
-    return res.status(500).json({ error: `Internal Server Error` });
+    return res.status(500).json({ error: `Internal Server Error, ${error}` });
   }
 });
 

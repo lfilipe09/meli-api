@@ -21,9 +21,9 @@ function itemsMapper(response, categories){
   }
 }
 
-function productsMapper(categories, productData){
+function productMapper(categories, productData, description){
   return {
-    categories: categories,
+    categories,
     items: {
       id: productData.id,
       title: productData.title,
@@ -38,12 +38,14 @@ function productsMapper(categories, productData){
       },
       picture_url: productData.pictures[0].url,
       condition: productData.condition,
-      free_shipping: productData.shipping.free_shipping
+      free_shipping: productData.shipping.free_shipping,
+      sold_qty: productData.sold_quantity,
+      description
     }
   }
 }
 
 module.exports = {
   itemsMapper,
-  productsMapper
+  productMapper
 }
