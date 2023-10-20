@@ -3,7 +3,7 @@ const express = require("express");
 const axios = require("axios");
 
 const app = express();
-const meliBaseURL = "https://api.mercadolibre.com/sites/MLB";
+const meliBaseURL = "https://api.mercadolibre.com";
 
 app.get("/", (req, res, next) => {
   return res.status(200).json({
@@ -19,7 +19,7 @@ app.get("/api/items", async (req, res, next) => {
     }
 
     const encodedQuery = encodeURIComponent(query); // Encode query to handle special characters
-    const searchURL = `${meliBaseURL}/search?q=${encodedQuery}`;
+    const searchURL = `${meliBaseURL}/sites/MLB/search?q=${encodedQuery}`;
     
     const response = await axios.get(searchURL);
     return res.status(200).json(response.data);
@@ -31,6 +31,7 @@ app.get("/api/items", async (req, res, next) => {
 app.get("/api/items/:id", async (req, res, next) => {
   try {
     const itemId = req.params.id;
+    console.log('itemId', itemId)
     const itemURL = `${meliBaseURL}/items?ids=${itemId}`;
     
     const response = await axios.get(itemURL);
