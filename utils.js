@@ -16,7 +16,8 @@ function itemsMapper(response, categories){
       },
       picture_url: result.thumbnail,
       condition: result.condition,
-      free_shipping: result.shipping.free_shipping
+      free_shipping: result.shipping.free_shipping,
+      city: result.address.city_name
     }))
   }
 }
