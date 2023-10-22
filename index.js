@@ -9,12 +9,22 @@ const meliBaseURL = "https://api.mercadolibre.com";
 app.get("/api/items", async (req, res, next) => {
   try {
     const query = req.query.search;
-    if (!query) {
-      return res.status(400).json({ error: "Search query is required" });
+    const category = req.query.category;
+
+    if (!query && !category) {
+      return res.status(400).json({ error: "Search query or category is required" });
     }
 
-    const encodedQuery = encodeURIComponent(query); 
-    const searchURL = `${meliBaseURL}/sites/MLB/search?q=${encodedQuery}`;
+    const encodedQuery = query ? encodeURIComponent(query) : '';
+    const encodedCategory = category ? encodeURIComponent(category) : '';
+
+    let searchURL;
+
+    if (query) {
+      searchURL = `${meliBaseURL}/sites/MLB/search?q=${encodedQuery}`;
+    } else {
+      searchURL = `${meliBaseURL}/sites/MLB/search?category=${encodedCategory}`;
+    }
 
     const categories = []
     
@@ -24,7 +34,7 @@ app.get("/api/items", async (req, res, next) => {
       .find(filter => filter.id === "category")?.values
       ?.map((value) => value.path_from_root
         .map(path => {
-          categories.push(path.name)
+          categories.push({name:path.name, id:path.id})
         }))
 
     const itemsResponse = itemsMapper(response, categories)
@@ -48,7 +58,7 @@ app.get("/api/items/:id", async (req, res, next) => {
     const descriptionURL = `${meliBaseURL}/items/${itemId}/description`;    
     const descriptionResponse = await axios.get(descriptionURL);
 
-    const categories = categoryResponse.data?.path_from_root?.map(path => path.name) || []
+    const categories = categoryResponse.data?.path_from_root?.map(path => ({name:path.name, id:path.id})) || []
 
     const itemResponse = productMapper(categories, response.data, descriptionResponse.data.plain_text)
 
